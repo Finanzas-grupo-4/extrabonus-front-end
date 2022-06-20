@@ -1,0 +1,34 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "KnighterBross58",
+      "password": "12345",
+      "email": "pablocin@gmail.com",
+      "ruc": "15423489065"
+    },
+    {
+      "id": 2,
+      "username": "MikePlp2",
+      "password": "hola10",
+      "email": "miguelgorman@gmail.com",
+      "ruc": "46842568579"
+    }
+  ],
+  "configurations": [
+    {
+      "id": 1,
+      "userId": 1,
+      "method": "frances",
+      "rate": "efectiva",
+      "currency": "dolares"
+    },
+    {
+      "id": 2,
+      "userId": 2,
+      "method": "americano",
+      "rate": "nominal",
+      "currency": "soles"
+    }
+  ]
+}

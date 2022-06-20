@@ -12,6 +12,8 @@ import Toolbar from "primevue/toolbar";
 import Button from "primevue/button";
 import Sidebar from "primevue/sidebar";
 import Divider from "primevue/divider";
+import RadioButton from "primevue/radiobutton";
+import Card from "primevue/card";
 
 const app = createApp(App);
 
@@ -22,5 +24,7 @@ app.component("pv-toolbar", Toolbar);
 app.component("pv-button", Button);
 app.component("pv-sidebar", Sidebar);
 app.component("pv-divider", Divider);
+app.component("pv-radio-button", RadioButton);
+app.component("pv-card", Card);
 
 app.mount("#app");

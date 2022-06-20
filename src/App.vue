@@ -24,18 +24,18 @@ export default{
     <h3>Menú</h3>
     <div>
       <router-link :to="{ name: 'crear-bono' }" style="text-decoration: None">
-        <pv-button class="p-button-text" icon="pi pi-plus-circle" iconPos="left" label="Crear bono" />
+        <pv-button class="p-button-text" icon="pi pi-plus-circle" iconPos="left" label="Crear bono" @click="drawer = false"/>
       </router-link>
     </div>
     <div>
       <router-link :to="{ name: 'crear-bono' }" style="text-decoration: None">
-        <pv-button class="p-button-text" icon="pi pi-history" iconPos="left" label="Historial" />
+        <pv-button class="p-button-text" icon="pi pi-history" iconPos="left" label="Historial" @click="drawer = false" />
       </router-link>
     </div>
     <pv-divider />
     <div>
-      <router-link :to="{ name: 'crear-bono' }" style="text-decoration: None">
-        <pv-button class="p-button-text" icon="pi pi-cog" iconPos="left" label="Configuración" />
+      <router-link :to="{ name: 'configuracion' }" style="text-decoration: None">
+        <pv-button class="p-button-text" icon="pi pi-cog" iconPos="left" label="Configuración" @click="drawer = false"/>
       </router-link>
     </div>
   </pv-sidebar>

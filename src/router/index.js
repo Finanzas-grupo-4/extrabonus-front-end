@@ -12,6 +12,11 @@ const router = createRouter({
       name: "crear-bono",
       component: () => import("../extrabonus/pages/crear-bono.component.vue"),
     },
+    {
+      path: "/configuracion",
+      name: "configuracion",
+      component: () => import("../extrabonus/pages/configuracion.component.vue"),
+    },
   ],
 });
 
