@@ -14,9 +14,16 @@ import Sidebar from "primevue/sidebar";
 import Divider from "primevue/divider";
 import RadioButton from "primevue/radiobutton";
 import Card from "primevue/card";
+import ToastService from "primevue/toastservice";
+import Toast from "primevue/toast";
+import InputText from "primevue/inputtext";
+import InputNumber from "primevue/inputnumber";
+import Dropdown from "primevue/dropdown";
+import Calendar from "primevue/calendar";
 
 const app = createApp(App);
 
+app.use(ToastService);
 app.use(router);
 app.use(PrimeVue, { ripple: true });
 
@@ -26,5 +33,10 @@ app.component("pv-sidebar", Sidebar);
 app.component("pv-divider", Divider);
 app.component("pv-radio-button", RadioButton);
 app.component("pv-card", Card);
+app.component("pv-toast", Toast);
+app.component("pv-input-text", InputText);
+app.component("pv-input-number", InputNumber);
+app.component("pv-dropdown", Dropdown);
+app.component("pv-calendar", Calendar)
 
 app.mount("#app");

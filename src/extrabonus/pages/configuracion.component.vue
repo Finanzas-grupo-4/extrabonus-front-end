@@ -1,4 +1,5 @@
 <template>
+  <pv-toast />
   <pv-card class="mt-3">
     <template #title>
       Configuración
@@ -110,7 +111,14 @@ export default {
     },
     updateConfiguration() {
       this.configuration = this.getStorableConfiguration(this.configuration)
-      this.configurationApiService.update(1, this.configuration)
+      this.configurationApiService.update(1, this.configuration).then(p => {
+        this.$toast.add({
+          severity: "success",
+          summary: "Configuración guardada",
+          life: 3000,
+        });
+      })
+
     }
   }
 };
