@@ -78,6 +78,7 @@
 import { BonoApiService } from "../services/bono-api.service"
 import { ResultadoApiService } from "../services/resultado-api.service";
 import { StorageService } from "../../core/services/storage.service";
+import { CuotaApiService } from "../services/cuota-api.service";
 
 export default {
   name: "crear-bono.component",
@@ -85,9 +86,11 @@ export default {
     return{
       bonoApiService: null,
       resultadoApiService: null,
+      cuotaApiService: null,
       storageService: null,
       bono: {},
       resultado: {},
+      cuota: {},
       frecuencias: [
         { name: "Mensual", code: 30},
         { name: "Bimestral", code: 60},
@@ -117,10 +120,11 @@ export default {
     }
   },
   created() {
-    this.bonoApiService = new BonoApiService
-    this.resultadoApiService = new ResultadoApiService
+    this.bonoApiService = new BonoApiService();
+    this.resultadoApiService = new ResultadoApiService();
+    this.cuotaApiService = new CuotaApiService();
     this.storageService = new StorageService();
-    this.storageService.set("bono", 1)
+    this.storageService.set("bono", 1);
 
     this.bonoApiService.getAll().then(response => {
       this.storageService.set("bono", response.data.pop().id + 1)
@@ -130,9 +134,7 @@ export default {
     addBono() {
       this.bono.id = 0
       this.bono.userId = 1
-      this.bonoApiService.create(this.bono).then(response => {
-        console.log("hola")
-      })
+      this.bonoApiService.create(this.bono)
       this.resultado.id = 0
       this.resultado.bonoId = parseInt(this.storageService.get("bono"))
       if (this.bono.frecuencia === 360) this.resultado.frecuencia = this.bono.dias
@@ -155,8 +157,54 @@ export default {
 
       this.resultadoApiService.create(this.resultado)
 
+      for(var i = 0; i <= this.resultado.totalPeriodo; i++){
+        this.cuota.id = 0;
+        this.cuota.bonoId = this.resultado.id;
+        this.cuota.numero = i;
+
+        if(this.cuota.numero !== 0) {
+
+          this.cuota.inflacion = 0
+          this.cuota.inflacionPeriodo = 0
+
+          if (this.cuota.numero === 1) this.cuota.bono = this.bono.nominal
+          else this.cuota.bono = this.cuota.indexado
+
+          this.cuota.indexado = this.cuota.bono * (1 + this.cuota.inflacionPeriodo)
+          this.cuota.cupon = -1 * this.cuota.indexado * this.resultado.efectiva
+
+          if (this.cuota.numero === this.resultado.totalPeriodo) {
+            this.cuota.prima = -1 * (this.bono.prima / 100) * this.cuota.indexado
+            this.cuota.amortizacion = -1 * this.bono.indexado
+          } else {
+            this.bono.prima = 0
+            this.bono.amortizacion = 0
+          }
+
+          this.cuota.escudo = -1 * this.cuota.cupon * (this.bono.renta / 100)
+
+          if (this.cuota.numero < this.resultado.totalPeriodo) this.cuota.emisor = this.cuota.cupon
+          else this.cuota.emisor = -1 * this.cuota.indexado + this.cuota.cupon + this.cuota.prima
+
+          this.cuota.emisorEscudo = this.cuota.emisor + this.cuota.escudo
+          this.cuota.bonista = -1 * this.cuota.emisor
+
+          this.cuota.activo = this.cuota.bonista / (Math.pow(1 + this.resultado.cok, this.cuota.numero))
+          this.cuota.plazo = this.cuota.activo * this.cuota.numero * this.resultado.frecuencia / this.bono.dias
+          this.cuota.convexidad = this.cuota.activo * this.cuota.numero * (1 + this.cuota.numero)
+        }
+        else{
+          this.cuota.emisor = this.bono.comercial - this.resultado.costoEmisor
+          this.cuota.bonista = this.resultado.costoInversor
+          this.cuota.emisorEscudo = this.cuota.emisor
+        }
+
+        this.cuotaApiService.create(this.cuota)
+      }
+
       this.resultado = {}
       this.bono = {}
+      this.cuota = {}
     }
   }
 }

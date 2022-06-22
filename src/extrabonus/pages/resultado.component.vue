@@ -38,6 +38,14 @@
       </div>
     </template>
   </pv-card>
+  <pv-card>
+    <template #title>
+      Cuotas
+    </template>
+    <template #content>
+      
+    </template>
+  </pv-card>
 
 </template>
 

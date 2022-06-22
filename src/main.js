@@ -20,6 +20,8 @@ import InputText from "primevue/inputtext";
 import InputNumber from "primevue/inputnumber";
 import Dropdown from "primevue/dropdown";
 import Calendar from "primevue/calendar";
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
 
 const app = createApp(App);
 
@@ -37,6 +39,8 @@ app.component("pv-toast", Toast);
 app.component("pv-input-text", InputText);
 app.component("pv-input-number", InputNumber);
 app.component("pv-dropdown", Dropdown);
-app.component("pv-calendar", Calendar)
+app.component("pv-calendar", Calendar);
+app.component("pv-datatable", DataTable);
+app.component("pv-column", Column);
 
 app.mount("#app");
