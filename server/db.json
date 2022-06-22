@@ -17,11 +17,11 @@
   ],
   "configurations": [
     {
-      "id": 1,
-      "userId": 1,
       "method": "frances",
-      "rate": "efectiva",
-      "currency": "dolares"
+      "rate": "nominal",
+      "currency": "dolares",
+      "id": 1,
+      "userId": 1
     },
     {
       "id": 2,
@@ -29,6 +29,43 @@
       "method": "americano",
       "rate": "nominal",
       "currency": "soles"
+    }
+  ],
+  "bonds": [
+    {
+      "nominal": 2,
+      "comercial": 2,
+      "anos": 2,
+      "frecuencia": 60,
+      "dias": 360,
+      "tasa": "nominal",
+      "capitalizacion": 15,
+      "interes": 2,
+      "descuento": 2,
+      "renta": 2,
+      "fecha": "2022-06-14T05:00:00.000Z",
+      "prima": 2,
+      "estructuracion": 2,
+      "colocacion": 2,
+      "flotacion": 2,
+      "cavali": 2,
+      "id": 1,
+      "userId": 1
+    }
+  ],
+  "results": [
+    {
+      "id": 1,
+      "bonoId": 1,
+      "frecuencia": 60,
+      "capitalizacion": 15,
+      "periodo": 6,
+      "totalPeriodo": 12,
+      "efectivaAnual": 5.827953427959557,
+      "efectiva": 0.37736304012345645,
+      "cok": 0.20093695517600274,
+      "costoEmisor": 0.16,
+      "costoInversor": 0.08
     }
   ]
 }

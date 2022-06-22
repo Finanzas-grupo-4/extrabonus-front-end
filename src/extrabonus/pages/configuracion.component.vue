@@ -100,17 +100,9 @@ export default {
     })
   },
   methods: {
-    getStorableConfiguration(displayableConfiguration){
-      return{
-        id: 1,
-        userId: 1,
-        method: displayableConfiguration.method,
-        rate: displayableConfiguration.rate,
-        currency: displayableConfiguration.currency
-      }
-    },
     updateConfiguration() {
-      this.configuration = this.getStorableConfiguration(this.configuration)
+      this.configuration.id = 1;
+      this.configuration.userId = 1;
       this.configurationApiService.update(1, this.configuration).then(p => {
         this.$toast.add({
           severity: "success",

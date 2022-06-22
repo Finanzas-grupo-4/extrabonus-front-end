@@ -17,6 +17,11 @@ const router = createRouter({
       name: "configuracion",
       component: () => import("../extrabonus/pages/configuracion.component.vue"),
     },
+    {
+      path: "/resultado/:id",
+      name: "resultado",
+      component: () => import("../extrabonus/pages/resultado.component.vue"),
+    },
   ],
 });
 
