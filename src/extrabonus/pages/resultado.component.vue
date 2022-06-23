@@ -38,12 +38,99 @@
       </div>
     </template>
   </pv-card>
-  <pv-card>
+  <pv-card class="mt-3">
+    <template #title>
+      Ratios de decisión
+    </template>
+    <template #content>
+      <div class="flex flex-row">
+        <h3>Duración:</h3>
+        <h3 class="ml-1 font-normal">{{ resultado.duracion }} </h3>
+      </div>
+      <div class="flex flex-row">
+        <h3>Convexidad:</h3>
+        <h3 class="ml-1 font-normal">{{ resultado.convexidad }}</h3>
+      </div>
+      <div class="flex flex-row">
+        <h3>Total:</h3>
+        <h3 class="ml-1 font-normal">{{ resultado.total }}</h3>
+      </div>
+      <div class="flex flex-row">
+        <h3>Duración modificada:</h3>
+        <h3 class="ml-1 font-normal">{{ resultado.duracionModif }}</h3>
+      </div>
+    </template>
+  </pv-card>
+  <pv-card class="mt-3">
     <template #title>
       Cuotas
     </template>
     <template #content>
-      
+      <pv-datatable
+          ref="dt"
+          :value="cuotas"
+          dataKey="id"
+          responsiveLayout="scroll"
+          sortField="numero"
+          :sortOrder="1"
+      >
+        <pv-column
+            field="numero"
+            header="N°"
+        ></pv-column>
+        <pv-column
+            field="inflacion"
+            header="Inflación anual"
+        ></pv-column>
+        <pv-column
+            field="bono"
+            header="Bono"
+        ></pv-column>
+        <pv-column
+            field="indexado"
+            header="Bono indexado"
+        ></pv-column>
+        <pv-column
+            field="cupon"
+            header="Cupón (Interés)"
+        ></pv-column>
+        <pv-column
+            field="amortizacion"
+            header="Amort."
+        ></pv-column>
+        <pv-column
+            field="prima"
+            header="Prima"
+        ></pv-column>
+        <pv-column
+            field="escudo"
+            header="Escudo"
+        ></pv-column>
+        <pv-column
+            field="emisor"
+            header="Flujo Emisor"
+        ></pv-column>
+        <pv-column
+            field="emisorEscudo"
+            header="Flujo Emisor c/Escudo"
+        ></pv-column>
+        <pv-column
+            field="bonista"
+            header="Flujo Bonista"
+        ></pv-column>
+        <pv-column
+            field="activo"
+            header="Flujo Act."
+        ></pv-column>
+        <pv-column
+            field="plazo"
+            header="FA x Plazo"
+        ></pv-column>
+        <pv-column
+            field="convexidad"
+            header="Factor p/Convexidad"
+        ></pv-column>
+      </pv-datatable>
     </template>
   </pv-card>
 
@@ -52,6 +139,8 @@
 <script>
 import {ResultadoApiService} from "../services/resultado-api.service";
 import {StorageService} from "../../core/services/storage.service";
+import { CuotaApiService } from "../services/cuota-api.service";
+import { BonoApiService } from "../services/bono-api.service";
 
 export default {
   name: "resultado-view.component",
@@ -59,13 +148,19 @@ export default {
     return{
       storageApiService: null,
       resultadoApiService: null,
+      cuotaApiService: null,
+      bonoApiService: null,
       resultado: {},
-      frecuencia: ""
+      bono: {},
+      cuotas: [],
+      frecuencia: "",
     }
   },
   created() {
     this.storageService = new StorageService()
     this.resultadoApiService = new ResultadoApiService()
+    this.cuotaApiService = new CuotaApiService()
+    this.bonoApiService = new BonoApiService()
 
     this.resultadoApiService.getByBondId(this.storageService.get("bono")).then( response =>{
       this.resultado = response.data[0]
@@ -78,6 +173,15 @@ export default {
         case 360: this.frecuencia = "anual"; break;
       }
     })
+
+    this.bonoApiService.getById(this.storageService.get("bono")).then( response => {
+      this.bono = response.data[0]
+    })
+
+    this.cuotaApiService.getByBondId(this.storageService.get("bono")).then( response => {
+      this.cuotas = response.data
+    })
+
   }
 }
 </script>

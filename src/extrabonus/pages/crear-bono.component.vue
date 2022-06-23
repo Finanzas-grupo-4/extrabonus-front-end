@@ -136,7 +136,7 @@ export default {
       this.bono.userId = 1
       this.bonoApiService.create(this.bono)
       this.resultado.id = 0
-      this.resultado.bonoId = parseInt(this.storageService.get("bono"))
+      this.resultado.bondId = parseInt(this.storageService.get("bono"))
       if (this.bono.frecuencia === 360) this.resultado.frecuencia = this.bono.dias
       else this.resultado.frecuencia = this.bono.frecuencia
 
@@ -155,11 +155,13 @@ export default {
       this.resultado.costoEmisor = ((this.bono.estructuracion + this.bono.cavali + this.bono.colocacion + this.bono.flotacion) / 100) * this.bono.comercial
       this.resultado.costoInversor = ((this.bono.cavali + this.bono.flotacion) / 100) * this.bono.comercial
 
-      this.resultadoApiService.create(this.resultado)
+      let sumaPlazo = 0
+      let sumaActivo = 0
+      let sumaConvexidad = 0
 
       for(var i = 0; i <= this.resultado.totalPeriodo; i++){
         this.cuota.id = 0;
-        this.cuota.bonoId = this.resultado.id;
+        this.cuota.bondId = parseInt(this.storageService.get("bono"));
         this.cuota.numero = i;
 
         if(this.cuota.numero !== 0) {
@@ -177,8 +179,8 @@ export default {
             this.cuota.prima = -1 * (this.bono.prima / 100) * this.cuota.indexado
             this.cuota.amortizacion = -1 * this.bono.indexado
           } else {
-            this.bono.prima = 0
-            this.bono.amortizacion = 0
+            this.cuota.prima = 0
+            this.cuota.amortizacion = 0
           }
 
           this.cuota.escudo = -1 * this.cuota.cupon * (this.bono.renta / 100)
@@ -190,17 +192,26 @@ export default {
           this.cuota.bonista = -1 * this.cuota.emisor
 
           this.cuota.activo = this.cuota.bonista / (Math.pow(1 + this.resultado.cok, this.cuota.numero))
+          sumaActivo += this.cuota.activo
           this.cuota.plazo = this.cuota.activo * this.cuota.numero * this.resultado.frecuencia / this.bono.dias
+          sumaPlazo += this.cuota.plazo
           this.cuota.convexidad = this.cuota.activo * this.cuota.numero * (1 + this.cuota.numero)
+          sumaConvexidad += this.cuota.convexidad
         }
         else{
           this.cuota.emisor = this.bono.comercial - this.resultado.costoEmisor
           this.cuota.bonista = this.resultado.costoInversor
           this.cuota.emisorEscudo = this.cuota.emisor
         }
-
-        this.cuotaApiService.create(this.cuota)
+        setTimeout(this.cuotaApiService.create(this.cuota), 3000)
       }
+
+      this.resultado.duracion = sumaPlazo / sumaActivo
+      this.resultado.convexidad = sumaConvexidad / (Math.pow(1 + this.resultado.cok, 2) * sumaActivo * Math.pow(this.bono.dias / this.resultado.frecuencia, 2))
+      this.resultado.total = this.resultado.duracion + this.resultado.convexidad
+      this.resultado.duracionModif = this.resultado.duracion / (1 + this.resultado.cok)
+
+      this.resultadoApiService.create(this.resultado)
 
       this.resultado = {}
       this.bono = {}
