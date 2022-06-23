@@ -6,11 +6,11 @@
     <template #content>
       <div class="flex flex-row">
         <h3>Frecuencia del cupón:</h3>
-        <h3 class="ml-1 font-normal">{{resultado.frecuencia }} días</h3>
+        <h3 class="ml-1 font-normal">{{ resultado.frecuencia }} días</h3>
       </div>
       <div class="flex flex-row">
         <h3>Días capitalización: </h3>
-        <h3 class="ml-1 font-normal">{{resultado.capitalizacion }} días</h3>
+        <h3 class="ml-1 font-normal">{{ resultado.capitalizacion }} días</h3>
       </div>
       <div class="flex flex-row">
         <h3>Número de periodos por año: </h3>
@@ -30,11 +30,11 @@
       </div>
       <div class="flex flex-row">
         <h3>Costos/gastos iniciales del emisor:</h3>
-        <h3 class="ml-1 font-normal"> {{resultado.costoEmisor }} </h3>
+        <h3 class="ml-1 font-normal"> {{ resultado.costoEmisor }} </h3>
       </div>
       <div class="flex flex-row">
         <h3>Costos/gastos iniciales del inversor:</h3>
-        <h3 class="ml-1 font-normal">{{resultado.costoInversor }} </h3>
+        <h3 class="ml-1 font-normal">{{ resultado.costoInversor }} </h3>
       </div>
     </template>
   </pv-card>
@@ -73,6 +73,7 @@
           responsiveLayout="scroll"
           sortField="numero"
           :sortOrder="1"
+          editMode="cell"
       >
         <pv-column
             field="numero"
@@ -81,7 +82,11 @@
         <pv-column
             field="inflacion"
             header="Inflación anual"
-        ></pv-column>
+        >
+          <template #editor="slotProps">
+            <pv-input-number  v-model="cuotas[slotProps.data.numero].inflacion" suffix="%" autofocus />
+          </template>
+        </pv-column>
         <pv-column
             field="bono"
             header="Bono"

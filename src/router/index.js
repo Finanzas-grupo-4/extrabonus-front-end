@@ -18,6 +18,11 @@ const router = createRouter({
       component: () => import("../extrabonus/pages/configuracion.component.vue"),
     },
     {
+      path: "/historial",
+      name: "historial",
+      component: () => import("../extrabonus/pages/historial.component.vue"),
+    },
+    {
       path: "/resultado/:id",
       name: "resultado",
       component: () => import("../extrabonus/pages/resultado.component.vue"),

@@ -28,7 +28,7 @@ export default{
       </router-link>
     </div>
     <div>
-      <router-link :to="{ name: 'crear-bono' }" style="text-decoration: None">
+      <router-link :to="{ name: 'historial' }" style="text-decoration: None">
         <pv-button class="p-button-text" icon="pi pi-history" iconPos="left" label="Historial" @click="drawer = false" />
       </router-link>
     </div>
