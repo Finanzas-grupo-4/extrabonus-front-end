@@ -23,6 +23,11 @@ const router = createRouter({
       component: () => import("../extrabonus/pages/historial.component.vue"),
     },
     {
+      path: "/perfil",
+      name: "perfil",
+      component: () => import("../extrabonus/pages/perfil.component.vue"),
+    },
+    {
       path: "/resultado/:id",
       name: "resultado",
       component: () => import("../extrabonus/pages/resultado.component.vue"),
