@@ -1,23 +1,54 @@
 <script>
+import { UsuarioApiService } from "./extrabonus/services/usuario-api.service";
+import { StorageService } from "./core/services/storage.service";
+
 export default {
   data() {
     return {
+      usuarioApiService: null,
+      storageService: null,
       drawer: false,
       iniciosesion: false,
       loginDialog: false,
+      usuario: "",
+      contrasena: "",
       inicioOpcion: "Iniciar sesión",
       opciones: ["Iniciar sesión", "Registrarse"],
     };
   },
+  created() {
+    this.usuarioApiService = new UsuarioApiService();
+    this.storageService = new StorageService();
+  },
   methods: {
-    IniciarSesion() {
-      this.loginDialog = true;
-    },
+    iniciarSesion(){
+      this.usuarioApiService.getByUsernameAndPassword(this.usuario, this.contrasena).then(response =>{
+        if(response.data.length === 0){
+          this.$toast.add({
+            severity: "error",
+            summary: "Inicio de sesión fallido",
+            detail: "El nombre de usuario y/o la contraseña ingresada no son correctos",
+            life: 3000,
+          });
+        }
+        else{
+          this.$toast.add({
+            severity: "success",
+            summary: "Sesión iniciada correctamente",
+            life: 3000,
+          });
+          this.iniciosesion = true
+          this.loginDialog = false
+          this.storageService.set("usuario", response.data[0].id)
+        }
+      })
+    }
   },
 };
 </script>
 
 <template>
+  <pv-toast />
   <pv-toolbar class="bg-primary">
     <template #start>
       <pv-button icon="pi pi-bars" @click="drawer = !drawer"></pv-button>
@@ -33,7 +64,7 @@ export default {
       <pv-button
         v-else
         icon="pi pi-sign-in"
-        @click="IniciarSesion"
+        @click="loginDialog = true"
         label="Iniciar sesión"
       ></pv-button>
     </template>
@@ -55,12 +86,12 @@ export default {
 
         <div>
           <label for="email1" class="block text-900 font-medium mb-2">Nombre de usuario</label>
-          <pv-input-text id="email1" type="text" class="w-full mb-3" />
+          <pv-input-text id="email1" type="text" v-model="usuario" class="w-full mb-3" />
 
           <label for="password1" class="block text-900 font-medium mb-2">Contraseña</label>
-          <pv-input-text id="password1" type="password" class="w-full mb-3" />
+          <pv-input-text id="password1" type="password" v-model="contrasena" class="w-full mb-3" />
 
-          <pv-button label="Iniciar sesión" class="mt-3 w-full"></pv-button>
+          <pv-button label="Iniciar sesión" @click="iniciarSesion" class="mt-3 w-full"></pv-button>
         </div>
         </template>
       </pv-card>
