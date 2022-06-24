@@ -13,6 +13,13 @@
       "password": "hola10",
       "email": "miguelgorman@gmail.com",
       "ruc": "46842568579"
+    },
+    {
+      "username": "a",
+      "password": "1",
+      "email": "a",
+      "ruc": 2,
+      "id": 3
     }
   ],
   "configurations": [

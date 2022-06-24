@@ -9,6 +9,10 @@ export class UsuarioApiService {
         return http.get(`/users?username=${username}&password=${password}`);
     }
 
+    getByUsername(username) {
+        return http.get(`/users?username=${username}`);
+    }
+
     getById(id) {
         return http.get(`/users/${id}`);
     }

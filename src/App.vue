@@ -8,9 +8,14 @@ export default {
       usuarioApiService: null,
       storageService: null,
       drawer: false,
+      submitted: false,
+      submittedLogin: false,
       iniciosesion: false,
       loginDialog: false,
+      coincidencia: false,
+      incorrecto: false,
       usuario: "",
+      user: {},
       contrasena: "",
       inicioOpcion: "Iniciar sesión",
       opciones: ["Iniciar sesión", "Registrarse"],
@@ -21,9 +26,20 @@ export default {
     this.storageService = new StorageService();
   },
   methods: {
+    openDialog(){
+      this.incorrecto = false
+      this.submittedLogin = false
+      this.coincidencia = false
+      this.user = {}
+      this.submitted = false
+      this.drawer = false
+      this.loginDialog = true
+    },
     iniciarSesion(){
+      this.submittedLogin = true
       this.usuarioApiService.getByUsernameAndPassword(this.usuario, this.contrasena).then(response =>{
         if(response.data.length === 0){
+          this.incorrecto = true
           this.$toast.add({
             severity: "error",
             summary: "Inicio de sesión fallido",
@@ -42,6 +58,44 @@ export default {
           this.storageService.set("usuario", response.data[0].id)
         }
       })
+    },
+    Registrarse(){
+      this.submitted = true;
+      if(this.user.username || this.user.email || this.user.password || this.user.ruc){
+        this.usuarioApiService.getByUsername(this.user.username).then(response =>{
+          if(response.data.length !== 0){
+            this.coincidencia = true
+            this.$toast.add({
+              severity: "error",
+              summary: "Registro fallido",
+              detail: "El nombre de usuario ingresado ya existe",
+              life: 3000,
+            });
+          }
+          if(!this.coincidencia){
+            this.user.id = 0;
+            this.usuarioApiService.create(this.user).then(response => {
+              this.storageService.set("usuario", response.data.id)
+              this.$toast.add({
+                severity: "success",
+                summary: "Registrado correctamente",
+                detail: "Sesión iniciada",
+                life: 3000,
+              });
+              this.loginDialog = false
+              this.iniciosesion = true
+            })
+          }
+        })
+      }
+      else{
+        this.$toast.add({
+          severity: "error",
+          summary: "Registro fallido",
+          detail: "Ingrese todos los datos correctamente",
+          life: 3000,
+        });
+      }
     }
   },
 };
@@ -64,7 +118,7 @@ export default {
       <pv-button
         v-else
         icon="pi pi-sign-in"
-        @click="loginDialog = true"
+        @click="openDialog"
         label="Iniciar sesión"
       ></pv-button>
     </template>
@@ -86,11 +140,12 @@ export default {
 
         <div>
           <label for="email1" class="block text-900 font-medium mb-2">Nombre de usuario</label>
-          <pv-input-text id="email1" type="text" v-model="usuario" class="w-full mb-3" />
+          <pv-input-text id="email1" type="text" v-model="usuario" class="w-full mb-3" :class="{ 'p-invalid': submittedLogin && incorrecto }"/>
 
           <label for="password1" class="block text-900 font-medium mb-2">Contraseña</label>
-          <pv-input-text id="password1" type="password" v-model="contrasena" class="w-full mb-3" />
-
+          <pv-input-text id="password1" type="password" v-model="contrasena" class="w-full mb-3" :class="{ 'p-invalid': submittedLogin && incorrecto }" />
+          <small class="p-error" v-if="submittedLogin && incorrecto"
+          >El nombre de usuario y/o la contraseña ingresada no son correctos</small>
           <pv-button label="Iniciar sesión" @click="iniciarSesion" class="mt-3 w-full"></pv-button>
         </div>
         </template>
@@ -104,19 +159,29 @@ export default {
           </div>
 
           <div>
-            <label for="email1" class="block text-900 font-medium mb-2">Nombre de usuario</label>
-            <pv-input-text type="text" class="w-full mb-3" />
+            <label class="block text-900 font-medium mb-2 mt-3">Nombre de usuario</label>
+            <pv-input-text v-model="user.username" type="text" class="w-full" :class="{ 'p-invalid': submitted && !user.username || submitted && coincidencia }"/>
+            <small class="p-error" v-if="submitted && !user.username"
+            >Ingrese un nombre de usuario</small>
+            <small class="p-error" v-if="submitted && coincidencia"
+            >El nombre de usuario ingresado ya existe</small>
 
-            <label for="password1" class="block text-900 font-medium mb-2">Contraseña</label>
-            <pv-input-text type="password" class="w-full mb-3" />
+            <label class="block text-900 font-medium mb-2 mt-3">Contraseña</label>
+            <pv-input-text v-model="user.password" type="password" class="w-full" :class="{ 'p-invalid': submitted && !user.password }"/>
+            <small class="p-error" v-if="submitted && !user.password"
+            >Ingrese una contraseña</small>
 
-            <label for="email1" class="block text-900 font-medium mb-2">Correo electrónico</label>
-            <pv-input-text  type="text" class="w-full mb-3" />
+            <label class="block text-900 font-medium mb-2 mt-3">Correo electrónico</label>
+            <pv-input-text v-model="user.email" type="text" class="w-full" :class="{ 'p-invalid': submitted && !user.email }"/>
+            <small class="p-error" v-if="submitted && !user.email"
+            >Ingrese un correo electrónico</small>
 
-            <label for="email1" class="block text-900 font-medium mb-2">RUC</label>
-            <pv-input-number  type="text" class="w-full mb-3" />
+            <label  class="block text-900 font-medium mb-2 mt-3">RUC</label>
+            <pv-input-number v-model="user.ruc" type="text" class="w-full" :class="{ 'p-invalid': submitted && !user.ruc }"/>
+            <small class="p-error" v-if="submitted && !user.ruc"
+            >Ingrese un RUC</small>
 
-            <pv-button label="Registrarse" class="mt-3 w-full"></pv-button>
+            <pv-button label="Registrarse" @click="Registrarse" class="mt-3 w-full"></pv-button>
           </div>
         </template>
       </pv-card>
@@ -183,10 +248,13 @@ export default {
         icon="pi pi-sign-in"
         iconPos="left"
         label="Iniciar sesión"
-        @click="
-          this.loginDialog = true;
-          drawer = false;
-        "
+        @click="this.incorrecto = false;
+        this.submittedLogin = false;
+        this.coincidencia = false;
+        this.user = {};
+        this.submitted = false;
+        this.drawer = false;
+        this.loginDialog = true;"
       />
     </div>
   </pv-sidebar>
