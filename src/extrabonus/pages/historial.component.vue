@@ -10,6 +10,9 @@
           dataKey="id"
           responsiveLayout="scroll"
       >
+        <template #empty>
+          No ha creado ningún bono
+        </template>
         <pv-column
             field="id"
             header="N°"
@@ -50,7 +53,7 @@ export default {
     this.bonoApiService = new BonoApiService()
     this.storageService = new StorageService()
 
-    this.bonoApiService.getAll().then(response => {
+    this.bonoApiService.getByUserId(this.storageService.get("usuario")).then(response => {
       this.bonos = response.data
     })
   },

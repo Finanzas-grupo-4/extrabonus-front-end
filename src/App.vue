@@ -24,6 +24,10 @@ export default {
   created() {
     this.usuarioApiService = new UsuarioApiService();
     this.storageService = new StorageService();
+
+    if(this.storageService.get("usuario") < 0 || this.storageService.get("usuario") === null) this.iniciosesion = false
+    else this.iniciosesion = true
+
   },
   methods: {
     openDialog(){
@@ -34,6 +38,8 @@ export default {
       this.submitted = false
       this.drawer = false
       this.loginDialog = true
+      this.usuario = ""
+      this.contrasena = ""
     },
     iniciarSesion(){
       this.submittedLogin = true
@@ -106,6 +112,7 @@ export default {
   <pv-toolbar class="bg-primary">
     <template #start>
       <pv-button icon="pi pi-bars" @click="drawer = !drawer"></pv-button>
+      <h3 class="text-white font-medium">Extra  Bonus</h3>
     </template>
     <template #end>
       <router-link
@@ -130,7 +137,7 @@ export default {
     :modal="true"
     class="p-fluid"
   >
-    <pv-select-button class="bg-primary w-full" v-model="inicioOpcion" :options="opciones" />
+    <pv-select-button class="mt-1 w-full" v-model="inicioOpcion" :options="opciones" />
     <div v-if="inicioOpcion === 'Iniciar sesión'" class="w-full">
       <pv-card class="mt-3 surface-card p-4 shadow-2 border-round w-full">
         <template #content>
@@ -228,6 +235,10 @@ export default {
       </router-link>
     </div>
     <div>
+      <router-link
+          :to="{ name: 'home' }"
+          style="text-decoration: None"
+      >
       <pv-button
         class="p-button-text"
         icon="pi pi-sign-out"
@@ -236,8 +247,10 @@ export default {
         @click="
           drawer = false;
           iniciosesion = false;
+          this.storageService.set('usuario', -1)
         "
       />
+      </router-link>
     </div>
   </pv-sidebar>
   <pv-sidebar v-else v-model:visible="drawer" class="p-sidebar-sm">
@@ -254,15 +267,12 @@ export default {
         this.user = {};
         this.submitted = false;
         this.drawer = false;
-        this.loginDialog = true;"
+        this.loginDialog = true;
+        this.usuario = '';
+        this.contrasena = '';"
+
       />
     </div>
   </pv-sidebar>
   <RouterView />
 </template>
-
-<style>
-.p-selectbutton{
-  background-color: #f2f2f2;
-}
-</style>

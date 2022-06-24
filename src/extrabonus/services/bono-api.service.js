@@ -5,6 +5,10 @@ export class BonoApiService {
         return http.get("/bonds");
     }
 
+    getByUserId(id){
+        return http.get(`/users/${id}/bonds`);
+    }
+
     getById(id) {
         return http.get(`/bonds/${id}`);
     }

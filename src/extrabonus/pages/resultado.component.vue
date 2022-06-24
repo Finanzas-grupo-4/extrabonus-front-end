@@ -17,6 +17,10 @@
         <h3 class="ml-1 font-normal">{{ resultado.periodo }} </h3>
       </div>
       <div class="flex flex-row">
+        <h3>Total periodos: </h3>
+        <h3 class="ml-1 font-normal">{{ resultado.totalPeriodo }} </h3>
+      </div>
+      <div class="flex flex-row">
         <h3>Tasa efectiva anual:</h3>
         <h3 class="ml-1 font-normal">{{ resultado.efectivaAnual }} </h3>
       </div>
@@ -26,7 +30,7 @@
       </div>
       <div class="flex flex-row">
         <h3>COK {{ this.frecuencia }}:</h3>
-        <h3 class="ml-1 font-normal">{{resultado.periodo }} </h3>
+        <h3 class="ml-1 font-normal">{{resultado.cok }} </h3>
       </div>
       <div class="flex flex-row">
         <h3>Costos/gastos iniciales del emisor:</h3>
@@ -35,6 +39,21 @@
       <div class="flex flex-row">
         <h3>Costos/gastos iniciales del inversor:</h3>
         <h3 class="ml-1 font-normal">{{ resultado.costoInversor }} </h3>
+      </div>
+    </template>
+  </pv-card>
+  <pv-card class="mt-3">
+    <template #title>
+      Resultados del precio actual y utilidad
+    </template>
+    <template #content>
+      <div class="flex flex-row">
+        <h3>Precio actual:</h3>
+        <h3 class="ml-1 font-normal">{{ resultado.precio }} </h3>
+      </div>
+      <div class="flex flex-row">
+        <h3>Utilidad / Pérdida:</h3>
+        <h3 class="ml-1 font-normal">{{ resultado.utilidad }} </h3>
       </div>
     </template>
   </pv-card>
@@ -58,6 +77,25 @@
       <div class="flex flex-row">
         <h3>Duración modificada:</h3>
         <h3 class="ml-1 font-normal">{{ resultado.duracionModif }}</h3>
+      </div>
+    </template>
+  </pv-card>
+  <pv-card class="mt-3">
+    <template #title>
+      Resultados de los indicadores de rentabilidad
+    </template>
+    <template #content>
+      <div class="flex flex-row">
+        <h3>TCEA Emisor</h3>
+        <h3 class="ml-1 font-normal">{{ resultado.TCEAemisor }} </h3>
+      </div>
+      <div class="flex flex-row">
+        <h3>TCEA Emisor con escudo</h3>
+        <h3 class="ml-1 font-normal">{{ resultado.TCEAemisorEscudo }}</h3>
+      </div>
+      <div class="flex flex-row">
+        <h3>TREA Bonista</h3>
+        <h3 class="ml-1 font-normal">{{ resultado.TREAbonista }}</h3>
       </div>
     </template>
   </pv-card>

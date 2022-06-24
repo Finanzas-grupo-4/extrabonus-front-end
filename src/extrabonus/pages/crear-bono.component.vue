@@ -25,13 +25,13 @@
         <h4 class="flex">Capitalización:</h4>
         <pv-dropdown class="p-dropdown flex w-12rem ml-2" :options="capitalizaciones" optionLabel="name" optionValue="code" v-model="bono.capitalizacion"></pv-dropdown>
         <h4 class="flex ml-2 ">Tasa de interés anual:</h4>
-        <pv-input-number class="flex ml-2" v-model="bono.interes" suffix="%"></pv-input-number>
+        <pv-input-number class="flex ml-2" v-model="bono.interes" mode="decimal" suffix="%"></pv-input-number>
         <h4 class="flex ml-2">Tasa anual de descuento:</h4>
-        <pv-input-number class="flex ml-2" v-model="bono.descuento" suffix="%"></pv-input-number>
+        <pv-input-number class="flex ml-2" v-model="bono.descuento" mode="decimal" suffix="%"></pv-input-number>
       </div>
       <div class="flex flex-row align-items-center justify-content-center">
         <h4 class="flex">Impuesto a la renta:</h4>
-        <pv-input-number class="flex ml-2" v-model="bono.renta" suffix="%"></pv-input-number>
+        <pv-input-number class="flex ml-2" v-model="bono.renta" mode="decimal" suffix="%"></pv-input-number>
         <h4 class="flex ml-2 ">Fecha de emisión:</h4>
         <pv-calendar class="flex ml-2" v-model="bono.fecha" dateFormat="dd/mm/yy" :showIcon="true" />
       </div>
@@ -45,23 +45,23 @@
     <template #content>
       <div class="flex flex-row align-items-center justify-content-center">
         <h4 class="flex ml-2">% Prima:</h4>
-        <pv-input-number class="flex ml-2" v-model="bono.prima" suffix="%"></pv-input-number>
+        <pv-input-number class="flex ml-2" v-model="bono.prima" mode="decimal" suffix="%"></pv-input-number>
       </div>
       <div class="flex flex-row align-items-center justify-content-center">
         <h4 class="flex ml-2 ">% Estructuracion:</h4>
-        <pv-input-number class="flex ml-2" v-model="bono.estructuracion" suffix="%"></pv-input-number>
+        <pv-input-number class="flex ml-2" v-model="bono.estructuracion" mode="decimal" suffix="%"></pv-input-number>
       </div>
       <div class="flex flex-row align-items-center justify-content-center">
         <h4 class="flex ml-2 ">% Colocación:</h4>
-        <pv-input-number class="flex ml-2" v-model="bono.colocacion" suffix="%"></pv-input-number>
+        <pv-input-number class="flex ml-2" v-model="bono.colocacion" mode="decimal" suffix="%"></pv-input-number>
       </div>
       <div class="flex flex-row align-items-center justify-content-center">
         <h4 class="flex ml-2 ">% Flotación:</h4>
-        <pv-input-number class="flex ml-2" v-model="bono.flotacion" suffix="%"></pv-input-number>
+        <pv-input-number class="flex ml-2" v-model="bono.flotacion" mode="decimal" suffix="%"></pv-input-number>
       </div>
       <div class="flex flex-row align-items-center justify-content-center">
         <h4 class="flex ml-2 ">% CAVALI:</h4>
-        <pv-input-number class="flex ml-2" v-model="bono.cavali" suffix="%"></pv-input-number>
+        <pv-input-number class="flex ml-2" v-model="bono.cavali" mode="decimal" suffix="%"></pv-input-number>
       </div>
     </template>
     <template #footer>
@@ -131,9 +131,33 @@ export default {
     })
   },
   methods: {
+    van(tasa, arreglo){
+      let resultado = 0
+      for(var i = 1; i <= arreglo.length; i++ ){
+        resultado += (arreglo[i - 1])/(Math.pow(1 + tasa, i))
+      }
+      return resultado
+    },
+    tir(arreglo){
+      let minimo = 0.0;
+      let maximo = 1.0;
+      let vna;
+      let supuesto;
+      do {
+        supuesto = (minimo + maximo) / 2;
+        vna = this.van(supuesto, arreglo)
+        if (vna > 0) {
+          minimo = supuesto;
+        }
+        else {
+          maximo = supuesto;
+        }
+      } while(Math.abs(vna) > 0.001);
+      return supuesto;
+    },
     addBono() {
       this.bono.id = 0
-      this.bono.userId = 1
+      this.bono.userId = parseInt(this.storageService.get("usuario"))
       this.bonoApiService.create(this.bono)
       this.resultado.id = 0
       this.resultado.bondId = parseInt(this.storageService.get("bono"))
@@ -147,10 +171,10 @@ export default {
       this.resultado.totalPeriodo = this.resultado.periodo * this.bono.anos
 
       if (this.bono.tasa === "efectiva") this.resultado.efectivaAnual = this.bono.interes
-      else this.resultado.efectivaAnual = Math.pow(1 + this.bono.interes / (this.bono.dias / this.resultado.capitalizacion), this.bono.dias / this.resultado.capitalizacion) - 1
+      else this.resultado.efectivaAnual = (Math.pow(1 + this.bono.interes / 100 / (this.bono.dias / this.resultado.capitalizacion), this.bono.dias / this.resultado.capitalizacion) - 1) * 100
 
-      this.resultado.efectiva = Math.pow(1 + this.resultado.efectivaAnual, this.resultado.frecuencia / this.bono.dias) - 1
-      this.resultado.cok = Math.pow(1 + this.bono.descuento, this.resultado.frecuencia / this.bono.dias) - 1
+      this.resultado.efectiva = (Math.pow(1 + this.resultado.efectivaAnual / 100, this.resultado.frecuencia / this.bono.dias) - 1) * 100
+      this.resultado.cok = (Math.pow(1 + this.bono.descuento / 100, this.resultado.frecuencia / this.bono.dias) - 1) * 100
 
       this.resultado.costoEmisor = ((this.bono.estructuracion + this.bono.cavali + this.bono.colocacion + this.bono.flotacion) / 100) * this.bono.comercial
       this.resultado.costoInversor = ((this.bono.cavali + this.bono.flotacion) / 100) * this.bono.comercial
@@ -158,6 +182,9 @@ export default {
       let sumaPlazo = 0
       let sumaActivo = 0
       let sumaConvexidad = 0
+      let emisor = []
+      let bonista = []
+      let emisorEscudo = []
 
       for(var i = 0; i <= this.resultado.totalPeriodo; i++){
         this.cuota.id = 0;
@@ -173,11 +200,11 @@ export default {
           else this.cuota.bono = this.cuota.indexado
 
           this.cuota.indexado = this.cuota.bono * (1 + this.cuota.inflacionPeriodo)
-          this.cuota.cupon = -1 * this.cuota.indexado * this.resultado.efectiva
+          this.cuota.cupon = -1 * this.cuota.indexado * (this.resultado.efectiva / 100)
 
           if (this.cuota.numero === this.resultado.totalPeriodo) {
             this.cuota.prima = -1 * (this.bono.prima / 100) * this.cuota.indexado
-            this.cuota.amortizacion = -1 * this.bono.indexado
+            this.cuota.amortizacion = -1 * this.cuota.indexado
           } else {
             this.cuota.prima = 0
             this.cuota.amortizacion = 0
@@ -187,11 +214,14 @@ export default {
 
           if (this.cuota.numero < this.resultado.totalPeriodo) this.cuota.emisor = this.cuota.cupon
           else this.cuota.emisor = -1 * this.cuota.indexado + this.cuota.cupon + this.cuota.prima
+          emisor.push(this.cuota.emisor)
 
           this.cuota.emisorEscudo = this.cuota.emisor + this.cuota.escudo
+          emisorEscudo.push(this.cuota.emisorEscudo)
           this.cuota.bonista = -1 * this.cuota.emisor
+          bonista.push(this.cuota.bonista)
 
-          this.cuota.activo = this.cuota.bonista / (Math.pow(1 + this.resultado.cok, this.cuota.numero))
+          this.cuota.activo = this.cuota.bonista / (Math.pow(1 + this.resultado.cok / 100, this.cuota.numero))
           sumaActivo += this.cuota.activo
           this.cuota.plazo = this.cuota.activo * this.cuota.numero * this.resultado.frecuencia / this.bono.dias
           sumaPlazo += this.cuota.plazo
@@ -200,16 +230,25 @@ export default {
         }
         else{
           this.cuota.emisor = this.bono.comercial - this.resultado.costoEmisor
-          this.cuota.bonista = this.resultado.costoInversor
+          this.cuota.bonista = -1 * this.bono.comercial - this.resultado.costoInversor
           this.cuota.emisorEscudo = this.cuota.emisor
         }
-        setTimeout(this.cuotaApiService.create(this.cuota), 3000)
+        setTimeout(this.cuotaApiService.create(this.cuota), 5000)
       }
+      console.log(bonista)
+      this.resultado.precio = this.van(this.resultado.cok / 100, bonista)
+
+      this.resultado.utilidad = -1 * this.bono.comercial - this.resultado.costoInversor  + this.resultado.precio
 
       this.resultado.duracion = sumaPlazo / sumaActivo
-      this.resultado.convexidad = sumaConvexidad / (Math.pow(1 + this.resultado.cok, 2) * sumaActivo * Math.pow(this.bono.dias / this.resultado.frecuencia, 2))
+      this.resultado.convexidad = sumaConvexidad / (Math.pow(1 + this.resultado.cok / 100, 2) * sumaActivo * Math.pow(this.bono.dias / this.resultado.frecuencia, 2))
       this.resultado.total = this.resultado.duracion + this.resultado.convexidad
-      this.resultado.duracionModif = this.resultado.duracion / (1 + this.resultado.cok)
+      this.resultado.duracionModif = this.resultado.duracion / (1 + this.resultado.cok / 100)
+
+
+      //this.resultado.TCEAemisor = Math.pow(this.tir(emisor) + 1,this.bono.dias / this.resultado.frecuencia) - 1
+      //this.resultado.TCEAemisorEscudo = Math.pow(this.tir(emisorEscudo) + 1,this.bono.dias / this.resultado.frecuencia) - 1
+      //this.resultado.TREAbonista = Math.pow(this.tir(bonista) + 1,this.bono.dias / this.resultado.frecuencia) - 1
 
       this.resultadoApiService.create(this.resultado)
 

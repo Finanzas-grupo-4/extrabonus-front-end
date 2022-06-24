@@ -5,7 +5,12 @@ const router = createRouter({
   routes: [
     {
       path: "/",
-      redirect: "crear-bono",
+      redirect: "home",
+    },
+    {
+      path: "/home",
+      name: "home",
+      component: () => import("../extrabonus/pages/home.component.vue"),
     },
     {
       path: "/crear-bono",
