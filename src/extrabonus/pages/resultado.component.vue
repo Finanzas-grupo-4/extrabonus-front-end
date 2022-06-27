@@ -86,16 +86,16 @@
     </template>
     <template #content>
       <div class="flex flex-row">
-        <h3>TCEA Emisor</h3>
-        <h3 class="ml-1 font-normal">{{ resultado.TCEAemisor }} </h3>
+        <h3>TCEA Emisor:</h3>
+        <h3 class="ml-1 font-normal">{{ resultado.tceAemisor }} </h3>
       </div>
       <div class="flex flex-row">
-        <h3>TCEA Emisor con escudo</h3>
-        <h3 class="ml-1 font-normal">{{ resultado.TCEAemisorEscudo }}</h3>
+        <h3>TCEA Emisor con escudo:</h3>
+        <h3 class="ml-1 font-normal">{{ resultado.tceAemisorEscudo }}</h3>
       </div>
       <div class="flex flex-row">
-        <h3>TREA Bonista</h3>
-        <h3 class="ml-1 font-normal">{{ resultado.TREAbonista }}</h3>
+        <h3>TREA Bonista:</h3>
+        <h3 class="ml-1 font-normal">{{ resultado.treAbonista }}</h3>
       </div>
     </template>
   </pv-card>
@@ -204,6 +204,7 @@ export default {
     this.resultadoApiService = new ResultadoApiService()
     this.cuotaApiService = new CuotaApiService()
     this.bonoApiService = new BonoApiService()
+    console.log(parseInt(this.storageService.get("bono")))
 
     this.resultadoApiService.getByBondId(this.storageService.get("bono")).then( response =>{
       this.resultado = response.data[0]

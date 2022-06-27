@@ -6,7 +6,7 @@ export class CuotaApiService {
     }
 
     getByBondId(id) {
-        return http.get(`/bonds/${id}/dues`);
+        return http.get(`/BondsAndDues/${id}/dues`);
     }
 
     create(data) {

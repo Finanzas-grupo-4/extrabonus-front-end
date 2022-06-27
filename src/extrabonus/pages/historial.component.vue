@@ -15,8 +15,33 @@
         </template>
         <pv-column
             field="id"
-            header="N°"
+            header="N° Bono"
         ></pv-column>
+        <pv-column
+            field="nominal"
+            header="Valor nominal"
+        ></pv-column>
+        <pv-column
+            field="comercial"
+            header="Valor comercial"
+        ></pv-column>
+        <pv-column
+            field="anos"
+            header="Años"
+        ></pv-column>
+        <pv-column
+            field="interes"
+            header="Tasa de interes"
+        ></pv-column>
+        <pv-column
+            field="descuento"
+            header="Tasa de descuento"
+        ></pv-column>
+        <pv-column
+            field="fecha"
+            header="Fecha"
+        ></pv-column>
+
         <pv-column>
           <template #body="slotProps">
             <router-link

@@ -6,7 +6,7 @@
     <template #content>
       <div class="flex flex-row">
         <h3>Nombre de usuario:</h3>
-        <h3 class="ml-1 font-normal">{{ perfil.username }} </h3>
+        <h3 class="ml-1 font-normal">{{ perfil.name }} </h3>
       </div>
       <div class="flex flex-row">
         <h3>Email:</h3>

@@ -79,6 +79,7 @@ import { BonoApiService } from "../services/bono-api.service"
 import { ResultadoApiService } from "../services/resultado-api.service";
 import { StorageService } from "../../core/services/storage.service";
 import { CuotaApiService } from "../services/cuota-api.service";
+import { irr } from "node-irr";
 
 export default {
   name: "crear-bono.component",
@@ -140,121 +141,131 @@ export default {
     },
     tir(arreglo){
       let minimo = 0.0;
+      let correcto = false
       let maximo = 1.0;
       let vna;
-      let supuesto;
-      do {
+      let supuesto = (minimo + maximo) / 2
+      let anteriorVna = this.van(supuesto, arreglo)
+      do{
         supuesto = (minimo + maximo) / 2;
         vna = this.van(supuesto, arreglo)
-        if (vna > 0) {
-          minimo = supuesto;
+        if(correcto === false){
+          if (vna > 0) maximo = supuesto;
+          else minimo = supuesto;
+          if (Math.abs(anteriorVna) < Math.abs(vna)) {
+            correcto = true
+            minimo = 0
+            maximo = 1
+          }
         }
-        else {
-          maximo = supuesto;
+        else{
+          if (vna < 0) maximo = supuesto;
+          else minimo = supuesto;
         }
-      } while(Math.abs(vna) > 0.001);
+      } while(Math.abs(vna) > 0.00001);
       return supuesto;
     },
     addBono() {
-      this.bono.id = 0
       this.bono.userId = parseInt(this.storageService.get("usuario"))
-      this.bonoApiService.create(this.bono)
-      this.resultado.id = 0
-      this.resultado.bondId = parseInt(this.storageService.get("bono"))
-      if (this.bono.frecuencia === 360) this.resultado.frecuencia = this.bono.dias
-      else this.resultado.frecuencia = this.bono.frecuencia
+      this.bonoApiService.create(this.bono).then(response => {
+        this.resultado.bondId = parseInt(this.storageService.get("bono"))
+        if (this.bono.frecuencia === 360) this.resultado.frecuencia = this.bono.dias
+        else this.resultado.frecuencia = this.bono.frecuencia
 
-      if (this.bono.capitalizacion === 360) this.resultado.capitalizacion = this.bono.dias
-      else this.resultado.capitalizacion = this.bono.capitalizacion
+        if (this.bono.capitalizacion === 360) this.resultado.capitalizacion = this.bono.dias
+        else this.resultado.capitalizacion = this.bono.capitalizacion
 
-      this.resultado.periodo = this.bono.dias / this.resultado.frecuencia
-      this.resultado.totalPeriodo = this.resultado.periodo * this.bono.anos
+        this.resultado.periodo = this.bono.dias / this.resultado.frecuencia
+        this.resultado.totalPeriodo = this.resultado.periodo * this.bono.anos
 
-      if (this.bono.tasa === "efectiva") this.resultado.efectivaAnual = this.bono.interes
-      else this.resultado.efectivaAnual = (Math.pow(1 + this.bono.interes / 100 / (this.bono.dias / this.resultado.capitalizacion), this.bono.dias / this.resultado.capitalizacion) - 1) * 100
+        if (this.bono.tasa === "efectiva") this.resultado.efectivaAnual = this.bono.interes
+        else this.resultado.efectivaAnual = (Math.pow(1 + this.bono.interes / 100 / (this.bono.dias / this.resultado.capitalizacion), this.bono.dias / this.resultado.capitalizacion) - 1) * 100
 
-      this.resultado.efectiva = (Math.pow(1 + this.resultado.efectivaAnual / 100, this.resultado.frecuencia / this.bono.dias) - 1) * 100
-      this.resultado.cok = (Math.pow(1 + this.bono.descuento / 100, this.resultado.frecuencia / this.bono.dias) - 1) * 100
+        this.resultado.efectiva = (Math.pow(1 + this.resultado.efectivaAnual / 100, this.resultado.frecuencia / this.bono.dias) - 1) * 100
+        this.resultado.cok = (Math.pow(1 + this.bono.descuento / 100, this.resultado.frecuencia / this.bono.dias) - 1) * 100
 
-      this.resultado.costoEmisor = ((this.bono.estructuracion + this.bono.cavali + this.bono.colocacion + this.bono.flotacion) / 100) * this.bono.comercial
-      this.resultado.costoInversor = ((this.bono.cavali + this.bono.flotacion) / 100) * this.bono.comercial
+        this.resultado.costoEmisor = ((this.bono.estructuracion + this.bono.cavali + this.bono.colocacion + this.bono.flotacion) / 100) * this.bono.comercial
+        this.resultado.costoInversor = ((this.bono.cavali + this.bono.flotacion) / 100) * this.bono.comercial
 
-      let sumaPlazo = 0
-      let sumaActivo = 0
-      let sumaConvexidad = 0
-      let emisor = []
-      let bonista = []
-      let emisorEscudo = []
+        let sumaPlazo = 0
+        let sumaActivo = 0
+        let sumaConvexidad = 0
+        let emisor = []
+        let bonista = []
+        let emisorEscudo = []
 
-      for(var i = 0; i <= this.resultado.totalPeriodo; i++){
-        this.cuota.id = 0;
-        this.cuota.bondId = parseInt(this.storageService.get("bono"));
-        this.cuota.numero = i;
+        for (var i = 0; i <= this.resultado.totalPeriodo; i++) {
+          this.cuota.bondId = parseInt(this.storageService.get("bono"));
+          this.cuota.numero = i;
 
-        if(this.cuota.numero !== 0) {
+          if (this.cuota.numero !== 0) {
 
-          this.cuota.inflacion = 0
-          this.cuota.inflacionPeriodo = 0
+            this.cuota.inflacion = 0
+            this.cuota.inflacionPeriodo = 0
 
-          if (this.cuota.numero === 1) this.cuota.bono = this.bono.nominal
-          else this.cuota.bono = this.cuota.indexado
+            if (this.cuota.numero === 1) this.cuota.bono = this.bono.nominal
+            else this.cuota.bono = this.cuota.indexado
 
-          this.cuota.indexado = this.cuota.bono * (1 + this.cuota.inflacionPeriodo)
-          this.cuota.cupon = -1 * this.cuota.indexado * (this.resultado.efectiva / 100)
+            this.cuota.indexado = this.cuota.bono * (1 + this.cuota.inflacionPeriodo)
+            this.cuota.cupon = -1 * this.cuota.indexado * (this.resultado.efectiva / 100)
 
-          if (this.cuota.numero === this.resultado.totalPeriodo) {
-            this.cuota.prima = -1 * (this.bono.prima / 100) * this.cuota.indexado
-            this.cuota.amortizacion = -1 * this.cuota.indexado
+            if (this.cuota.numero === this.resultado.totalPeriodo) {
+              this.cuota.prima = -1 * (this.bono.prima / 100) * this.cuota.indexado
+              this.cuota.amortizacion = -1 * this.cuota.indexado
+            } else {
+              this.cuota.prima = 0
+              this.cuota.amortizacion = 0
+            }
+
+            this.cuota.escudo = -1 * this.cuota.cupon * (this.bono.renta / 100)
+
+            if (this.cuota.numero < this.resultado.totalPeriodo) this.cuota.emisor = this.cuota.cupon
+            else this.cuota.emisor = -1 * this.cuota.indexado + this.cuota.cupon + this.cuota.prima
+
+            this.cuota.emisorEscudo = this.cuota.emisor + this.cuota.escudo
+            this.cuota.bonista = -1 * this.cuota.emisor
+
+            this.cuota.activo = this.cuota.bonista / (Math.pow(1 + this.resultado.cok / 100, this.cuota.numero))
+            sumaActivo += this.cuota.activo
+            this.cuota.plazo = this.cuota.activo * this.cuota.numero * this.resultado.frecuencia / this.bono.dias
+            sumaPlazo += this.cuota.plazo
+            this.cuota.convexidad = this.cuota.activo * this.cuota.numero * (1 + this.cuota.numero)
+            sumaConvexidad += this.cuota.convexidad
           } else {
-            this.cuota.prima = 0
-            this.cuota.amortizacion = 0
+            this.cuota.emisor = this.bono.comercial - this.resultado.costoEmisor
+            this.cuota.bonista = -1 * this.bono.comercial - this.resultado.costoInversor
+            this.cuota.emisorEscudo = this.cuota.emisor
+
           }
-
-          this.cuota.escudo = -1 * this.cuota.cupon * (this.bono.renta / 100)
-
-          if (this.cuota.numero < this.resultado.totalPeriodo) this.cuota.emisor = this.cuota.cupon
-          else this.cuota.emisor = -1 * this.cuota.indexado + this.cuota.cupon + this.cuota.prima
-          emisor.push(this.cuota.emisor)
-
-          this.cuota.emisorEscudo = this.cuota.emisor + this.cuota.escudo
-          emisorEscudo.push(this.cuota.emisorEscudo)
-          this.cuota.bonista = -1 * this.cuota.emisor
           bonista.push(this.cuota.bonista)
-
-          this.cuota.activo = this.cuota.bonista / (Math.pow(1 + this.resultado.cok / 100, this.cuota.numero))
-          sumaActivo += this.cuota.activo
-          this.cuota.plazo = this.cuota.activo * this.cuota.numero * this.resultado.frecuencia / this.bono.dias
-          sumaPlazo += this.cuota.plazo
-          this.cuota.convexidad = this.cuota.activo * this.cuota.numero * (1 + this.cuota.numero)
-          sumaConvexidad += this.cuota.convexidad
+          emisorEscudo.push(this.cuota.emisorEscudo)
+          emisor.push(this.cuota.emisor)
+          this.cuotaApiService.create(this.cuota).then(response => {
+            console.log(response.data.id)
+          })
         }
-        else{
-          this.cuota.emisor = this.bono.comercial - this.resultado.costoEmisor
-          this.cuota.bonista = -1 * this.bono.comercial - this.resultado.costoInversor
-          this.cuota.emisorEscudo = this.cuota.emisor
-        }
-        setTimeout(this.cuotaApiService.create(this.cuota), 5000)
-      }
-      console.log(bonista)
-      this.resultado.precio = this.van(this.resultado.cok / 100, bonista)
+        this.resultado.precio = this.van(this.resultado.cok / 100, bonista)
 
-      this.resultado.utilidad = -1 * this.bono.comercial - this.resultado.costoInversor  + this.resultado.precio
+        this.resultado.utilidad = -1 * this.bono.comercial - this.resultado.costoInversor + this.resultado.precio
 
-      this.resultado.duracion = sumaPlazo / sumaActivo
-      this.resultado.convexidad = sumaConvexidad / (Math.pow(1 + this.resultado.cok / 100, 2) * sumaActivo * Math.pow(this.bono.dias / this.resultado.frecuencia, 2))
-      this.resultado.total = this.resultado.duracion + this.resultado.convexidad
-      this.resultado.duracionModif = this.resultado.duracion / (1 + this.resultado.cok / 100)
+        this.resultado.duracion = sumaPlazo / sumaActivo
+        this.resultado.convexidad = sumaConvexidad / (Math.pow(1 + this.resultado.cok / 100, 2) * sumaActivo * Math.pow(this.bono.dias / this.resultado.frecuencia, 2))
+        this.resultado.total = this.resultado.duracion + this.resultado.convexidad
+        this.resultado.duracionModif = this.resultado.duracion / (1 + this.resultado.cok / 100)
 
+        this.resultado.TCEAemisor = (Math.pow(irr(emisor) + 1, this.bono.dias / this.resultado.frecuencia) - 1) * 100
+        this.resultado.TCEAemisorEscudo = (Math.pow(irr(emisorEscudo) + 1, this.bono.dias / this.resultado.frecuencia) - 1) * 100
+        this.resultado.TREAbonista = (Math.pow(irr(bonista) + 1, this.bono.dias / this.resultado.frecuencia) - 1) * 100
 
-      //this.resultado.TCEAemisor = Math.pow(this.tir(emisor) + 1,this.bono.dias / this.resultado.frecuencia) - 1
-      //this.resultado.TCEAemisorEscudo = Math.pow(this.tir(emisorEscudo) + 1,this.bono.dias / this.resultado.frecuencia) - 1
-      //this.resultado.TREAbonista = Math.pow(this.tir(bonista) + 1,this.bono.dias / this.resultado.frecuencia) - 1
+        this.resultadoApiService.create(this.resultado).then(response => {
+          var id = response.data.id
+        })
 
-      this.resultadoApiService.create(this.resultado)
+        this.resultado = {}
+        this.bono = {}
+        this.cuota = {}
 
-      this.resultado = {}
-      this.bono = {}
-      this.cuota = {}
+      })
     }
   }
 }

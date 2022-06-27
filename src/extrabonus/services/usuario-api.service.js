@@ -6,11 +6,11 @@ export class UsuarioApiService {
     }
 
     getByUsernameAndPassword(username, password) {
-        return http.get(`/users?username=${username}&password=${password}`);
+        return http.get(`/users/${username}And${password}`);
     }
 
     getByUsername(username) {
-        return http.get(`/users?username=${username}`);
+        return http.get(`/users/=${username}`);
     }
 
     getById(id) {

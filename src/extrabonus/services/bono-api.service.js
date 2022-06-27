@@ -6,7 +6,7 @@ export class BonoApiService {
     }
 
     getByUserId(id){
-        return http.get(`/users/${id}/bonds`);
+        return http.get(`/UsersAndBonds/${id}/bonds`);
     }
 
     getById(id) {

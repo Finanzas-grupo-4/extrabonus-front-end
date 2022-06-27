@@ -10,7 +10,7 @@ export class ResultadoApiService {
     }
 
     getByBondId(id) {
-        return http.get(`/bonds/${id}/results`);
+        return http.get(`/BondsAnsResults/${id}/results`);
     }
 
     create(data) {

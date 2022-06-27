@@ -49,7 +49,7 @@ export default {
           this.$toast.add({
             severity: "error",
             summary: "Inicio de sesión fallido",
-            detail: "El nombre de usuario y/o la contraseña ingresada no son correctos",
+            detail: "El correo electrónico y/o la contraseña ingresada no son correctos",
             life: 3000,
           });
         }
@@ -61,37 +61,26 @@ export default {
           });
           this.iniciosesion = true
           this.loginDialog = false
-          this.storageService.set("usuario", response.data[0].id)
+          console.log(response.data)
+          this.storageService.set("usuario", response.data.id)
+          this.storageService.set("nombre", response.data.name)
         }
       })
     },
     Registrarse(){
       this.submitted = true;
-      if(this.user.username || this.user.email || this.user.password || this.user.ruc){
-        this.usuarioApiService.getByUsername(this.user.username).then(response =>{
-          if(response.data.length !== 0){
-            this.coincidencia = true
-            this.$toast.add({
-              severity: "error",
-              summary: "Registro fallido",
-              detail: "El nombre de usuario ingresado ya existe",
-              life: 3000,
-            });
-          }
-          if(!this.coincidencia){
-            this.user.id = 0;
-            this.usuarioApiService.create(this.user).then(response => {
-              this.storageService.set("usuario", response.data.id)
-              this.$toast.add({
-                severity: "success",
-                summary: "Registrado correctamente",
-                detail: "Sesión iniciada",
-                life: 3000,
-              });
-              this.loginDialog = false
-              this.iniciosesion = true
-            })
-          }
+      if(this.user.name || this.user.email || this.user.password || this.user.ruc){
+        this.usuarioApiService.create(this.user).then(response => {
+          this.storageService.set("usuario", response.data.id)
+          this.storageService.set("nombre", response.data.name)
+          this.$toast.add({
+            severity: "success",
+            summary: "Registrado correctamente",
+            detail: "Sesión iniciada",
+            life: 3000,
+          });
+          this.loginDialog = false
+          this.iniciosesion = true
         })
       }
       else{
@@ -115,12 +104,13 @@ export default {
       <h3 class="text-white font-medium">Extra  Bonus</h3>
     </template>
     <template #end>
+      <i v-if="inicioSesion" class="pi pi-user"></i>
       <router-link
         v-if="iniciosesion"
         :to="{ name: 'perfil' }"
         style="text-decoration: None"
       >
-        <pv-button icon="pi pi-user" label="Usuario 1"></pv-button>
+        <pv-button icon="pi pi-user" iconPos="right" label="a">{{storageService.get('nombre').replace(/['"]+/g, '')}}</pv-button>
       </router-link>
       <pv-button
         v-else
@@ -146,7 +136,7 @@ export default {
         </div>
 
         <div>
-          <label for="email1" class="block text-900 font-medium mb-2">Nombre de usuario</label>
+          <label for="email1" class="block text-900 font-medium mb-2">Correo electrónico</label>
           <pv-input-text id="email1" type="text" v-model="usuario" class="w-full mb-3" :class="{ 'p-invalid': submittedLogin && incorrecto }"/>
 
           <label for="password1" class="block text-900 font-medium mb-2">Contraseña</label>
@@ -166,25 +156,25 @@ export default {
           </div>
 
           <div>
-            <label class="block text-900 font-medium mb-2 mt-3">Nombre de usuario</label>
-            <pv-input-text v-model="user.username" type="text" class="w-full" :class="{ 'p-invalid': submitted && !user.username || submitted && coincidencia }"/>
-            <small class="p-error" v-if="submitted && !user.username"
-            >Ingrese un nombre de usuario</small>
+            <label class="block text-900 font-medium mb-2 mt-3">Correo electrónico</label>
+            <pv-input-text v-model="user.email" type="text" class="w-full" :class="{ 'p-invalid': submitted && !user.name || submitted && coincidencia }"/>
+            <small class="p-error" v-if="submitted && !user.email"
+            >Ingrese un correo electrónico</small>
             <small class="p-error" v-if="submitted && coincidencia"
-            >El nombre de usuario ingresado ya existe</small>
+            >El correo electrónico ingresado ya existe</small>
 
             <label class="block text-900 font-medium mb-2 mt-3">Contraseña</label>
             <pv-input-text v-model="user.password" type="password" class="w-full" :class="{ 'p-invalid': submitted && !user.password }"/>
             <small class="p-error" v-if="submitted && !user.password"
             >Ingrese una contraseña</small>
 
-            <label class="block text-900 font-medium mb-2 mt-3">Correo electrónico</label>
-            <pv-input-text v-model="user.email" type="text" class="w-full" :class="{ 'p-invalid': submitted && !user.email }"/>
-            <small class="p-error" v-if="submitted && !user.email"
-            >Ingrese un correo electrónico</small>
+            <label class="block text-900 font-medium mb-2 mt-3">Nombre de usuario</label>
+            <pv-input-text v-model="user.name" type="text" class="w-full" :class="{ 'p-invalid': submitted && !user.email }"/>
+            <small class="p-error" v-if="submitted && !user.name"
+            >Ingrese un nombre de usuario</small>
 
             <label  class="block text-900 font-medium mb-2 mt-3">RUC</label>
-            <pv-input-number v-model="user.ruc" type="text" class="w-full" :class="{ 'p-invalid': submitted && !user.ruc }"/>
+            <pv-input-text v-model="user.ruc" type="text" class="w-full" :class="{ 'p-invalid': submitted && !user.ruc }"/>
             <small class="p-error" v-if="submitted && !user.ruc"
             >Ingrese un RUC</small>
 
